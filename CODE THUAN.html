@@ -1,163 +1,94 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Hỏi Đáp Cùng Bác Sĩ Bệnh Viện Đa Khoa Phúc An</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            flex-direction: column;
-        }
-        .chatbox {
-            width: 400px;
-            height: 500px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            background-color: #fff;
-            display: none;
-        }
-        .messages {
-            flex: 1;
-            padding: 10px;
-            overflow-y: auto;
-            border-bottom: 1px solid #eee;
-        }
-        .input-box {
-            display: flex;
-            padding: 10px;
-            border-top: 1px solid #eee;
-            background-color: #fafafa;
-        }
-        .input-box input[type="text"] {
-            flex: 1;
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            outline: none;
-        }
-        .input-box button {
-            padding: 8px 12px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-left: 8px;
-        }
-        .login-box, .guest-box {
-            width: 300px;
-            padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            background-color: #fff;
-            margin-bottom: 10px;
-        }
-        .login-box input, .guest-box button {
-            width: 100%;
-            padding: 8px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            outline: none;
-        }
-        .login-box button, .guest-box button {
-            width: 100%;
-            padding: 10px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-    </style>
-</head>
-<body>
-    <div class="login-box" id="login-box">
-        <input type="text" id="username" placeholder="Tên đăng nhập" />
-        <input type="password" id="password" placeholder="Mật khẩu" />
-        <button onclick="login()">Đăng nhập</button>
-    </div>
+import SwiftUI
 
-    <div class="guest-box" id="guest-box">
-        <button onclick="enterAsGuest()">Vào chat ngay</button>
-    </div>
+struct ContentView: View {
+    @State private var username = ""
+    @State private var password = ""
+    @State private var message = ""
+    @State private var messages: [String] = []
+    @State private var userType = "Khách"
+    @State private var isLoggedIn = false
 
-    <div class="chatbox" id="chatbox">
-        <div class="messages" id="messages"></div>
-        <div class="input-box">
-            <input type="text" id="message-input" placeholder="Nhập tin nhắn..." />
-            <button onclick="sendMessage()">Gửi</button>
-        </div>
-    </div>
-
-    <script>
-        let visitorCount = 1;
-        let userType = 'Khách';
-
-        function login() {
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-
-            if (username === 'thuan' && password === 'thuanmarketing') {
-                userType = 'Bác Sĩ Phúc An';
-                document.getElementById('login-box').style.display = 'none';
-                document.getElementById('guest-box').style.display = 'none';
-                document.getElementById('chatbox').style.display = 'flex';
+    var body: some View {
+        VStack {
+            if !isLoggedIn {
+                VStack {
+                    TextField("Tên đăng nhập", text: $username)
+                        .padding()
+                        .background(Color.gray.opacity(0.2))
+                        .cornerRadius(8)
+                    SecureField("Mật khẩu", text: $password)
+                        .padding()
+                        .background(Color.gray.opacity(0.2))
+                        .cornerRadius(8)
+                    Button("Đăng nhập") {
+                        login()
+                    }
+                    .padding()
+                    .background(Color.green)
+                    .foregroundColor(.white)
+                    .cornerRadius(8)
+                }
+                .padding()
             } else {
-                alert('Sai tên đăng nhập hoặc mật khẩu!');
-            }
-        }
-
-        function enterAsGuest() {
-            userType = `Khách #${visitorCount}`;
-            document.getElementById('login-box').style.display = 'none';
-            document.getElementById('guest-box').style.display = 'none';
-            document.getElementById('chatbox').style.display = 'flex';
-            visitorCount++;
-            localStorage.setItem('visitorCount', visitorCount);
-        }
-
-        function sendMessage() {
-            const input = document.getElementById('message-input');
-            const message = input.value.trim();
-            if (message !== '') {
-                const messagesContainer = document.getElementById('messages');
-                const messageElement = document.createElement('div');
-                messageElement.textContent = `${userType}: ${message}`;
-                messagesContainer.appendChild(messageElement);
-                input.value = '';
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
-
-                // Lưu tin nhắn vào mảng (giới hạn 99 tin)
-                if (messagesContainer.childNodes.length > 99) messagesContainer.removeChild(messagesContainer.firstChild);
-
-                // Giả lập phản hồi từ bác sĩ nếu là khách
-                if (userType !== 'Bác Sĩ Phúc An') {
-                    setTimeout(() => {
-                        const replyElement = document.createElement('div');
-                        replyElement.textContent = `Bác Sĩ Phúc An: Tôi đã nhận được câu hỏi của bạn.`;
-                        messagesContainer.appendChild(replyElement);
-                        messagesContainer.scrollTop = messagesContainer.scrollHeight;
-                    }, 1000);
+                VStack {
+                    ScrollView {
+                        ForEach(messages, id: \.self) { msg in
+                            Text(msg)
+                                .padding()
+                                .background(Color.gray.opacity(0.1))
+                                .cornerRadius(8)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                    }
+                    .padding()
+                    
+                    HStack {
+                        TextField("Nhập tin nhắn...", text: $message)
+                            .padding()
+                            .background(Color.gray.opacity(0.2))
+                            .cornerRadius(8)
+                        Button("Gửi") {
+                            sendMessage()
+                        }
+                        .padding()
+                        .background(Color.green)
+                        .foregroundColor(.white)
+                        .cornerRadius(8)
+                    }
+                    .padding()
                 }
             }
         }
+        .padding()
+    }
+    
+    func login() {
+        if username == "thuan" && password == "thuanmarketing" {
+            userType = "Bác Sĩ Phúc An"
+            isLoggedIn = true
+        } else {
+            print("Sai tên đăng nhập hoặc mật khẩu!")
+        }
+    }
+    
+    func sendMessage() {
+        if !message.isEmpty {
+            messages.append("\(userType): \(message)")
+            message = ""
+            if userType != "Bác Sĩ Phúc An" {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                    messages.append("Bác Sĩ Phúc An: Tôi đã nhận được câu hỏi của bạn.")
+                }
+            }
+        }
+    }
+}
 
-        // Tăng số thứ tự khi tải lại trang
-        window.onload = () => {
-            visitorCount = localStorage.getItem('visitorCount') ? parseInt(localStorage.getItem('visitorCount')) + 1 : 1;
-            localStorage.setItem('visitorCount', visitorCount);
-        };
-    </script>
-</body>
-</html>
+@main
+struct ChatApp: App {
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+        }
+    }
+}
